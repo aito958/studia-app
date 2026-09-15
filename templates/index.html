@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudIA — Tutor de Informática</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0e0e10;
+      --surface:  #18181b;
+      --border:   #2a2a2e;
+      --accent:   #7c6aff;
+      --accent-dim: rgba(124, 106, 255, 0.12);
+      --text:     #e4e4e7;
+      --muted:    #71717a;
+      --user-bg:  #1e1e24;
+      --ia-bg:    #18181b;
+      --tag-bg:   rgba(124, 106, 255, 0.15);
+      --tag-text: #a89bff;
+      --error:    #f87171;
+      --font:     'Inter', sans-serif;
+      --mono:     'JetBrains Mono', monospace;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    header span {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-left: auto;
+    }
+
+    /* HERRAMIENTAS DISPONIBLES */
+    .tools-bar {
+      display: flex;
+      gap: 8px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .tool-chip {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--tag-text);
+      background: var(--tag-bg);
+      border: 1px solid rgba(124, 106, 255, 0.2);
+      border-radius: 4px;
+      padding: 3px 8px;
+    }
+
+    /* CHAT */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    #chat::-webkit-scrollbar { width: 4px; }
+    #chat::-webkit-scrollbar-track { background: transparent; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* MENSAJES */
+    .msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 680px;
+      gap: 4px;
+    }
+
+    .msg.usuario { align-self: flex-end; align-items: flex-end; }
+    .msg.ia      { align-self: flex-start; align-items: flex-start; }
+
+    .burbuja {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg.usuario .burbuja {
+      background: var(--user-bg);
+      border: 1px solid var(--border);
+      border-bottom-right-radius: 3px;
+      color: var(--text);
+    }
+
+    .msg.ia .burbuja {
+      background: var(--ia-bg);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+      color: var(--text);
+    }
+
+    .msg.ia .burbuja.error {
+      color: var(--error);
+      border-color: rgba(248, 113, 113, 0.3);
+    }
+
+    /* TAG herramienta usada */
+    .tool-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--tag-text);
+      background: var(--tag-bg);
+      border: 1px solid rgba(124, 106, 255, 0.2);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+
+    /* ESTADO PENSANDO */
+    .pensando .burbuja {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dots { display: flex; gap: 4px; }
+    .dots span {
+      width: 5px; height: 5px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: dot 1.2s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: .2s; }
+    .dots span:nth-child(3) { animation-delay: .4s; }
+
+    @keyframes dot {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40%            { opacity: 1;   transform: scale(1); }
+    }
+
+    /* INPUT */
+    .input-area {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .input-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    textarea {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      padding: 12px 14px;
+      resize: none;
+      outline: none;
+      min-height: 44px;
+      max-height: 160px;
+      line-height: 1.5;
+      transition: border-color .15s;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--muted); }
+
+    button {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 0 18px;
+      height: 44px;
+      cursor: pointer;
+      transition: opacity .15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      font-family: var(--mono);
+    }
+
+    /* BIENVENIDA */
+    .bienvenida {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 12px;
+      color: var(--muted);
+      text-align: center;
+      padding: 40px;
+    }
+
+    .bienvenida .icono { font-size: 40px; }
+    .bienvenida h2 { font-size: 18px; font-weight: 600; color: var(--text); }
+    .bienvenida p { font-size: 13px; line-height: 1.6; max-width: 380px; }
+
+    .sugerencias {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    
+
+        .sugerencia:hover { background: rgba(124, 106, 255, 0.22); }
+
+    /* NOTAS */
+    .nota-tag {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--tag-text);
+      background: var(--tag-bg);
+      border: 1px solid rgba(124, 106, 255, 0.2);
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-left: 6px;
+    }
+
+    /* MARKDOWN RENDERING */
+    .burbuja h1, .burbuja h2, .burbuja h3 { color: var(--text); margin: 8px 0 4px; }
+    .burbuja ul, .burbuja ol { margin-left: 20px; margin: 6px 0; }
+    .burbuja code {
+      background: rgba(124, 106, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+    }
+    .burbuja pre {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      margin: 8px 0;
+      overflow-x: auto;
+    }
+    .burbuja pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      color: #e4e4e7;
+      font-size: 12px;
+    }
+    .burbuja table { border-collapse: collapse; margin: 8px 0; width: 100%; }
+    .burbuja th, .burbuja td { border: 1px solid var(--border); padding: 4px 8px; font-size: 12px; }
+    .burbuja th { background: var(--tag-bg); }
+    .burbuja blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 10px;
+      margin: 8px 0;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+    <header>
+    <h1>📚 StudIA</h1>
+    <span>Tutor de Informática · openai/gpt-oss-20b · memoria activa</span>
+
+         <button id="btnNotas" onclick="verNotas()" title="Ver notas guardadas"
+       style="margin-right: 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;">
+       📋 Ver notas
+     </button>
+     <button id="btnLimpiar" onclick="limpiar()" title="Limpiar conversación"
+      style="margin-left: auto; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;">
+      🗑️ Limpiar
+    </button>
+  </header>
+
+  <div class="tools-bar">
+    <div class="tool-chip">🕐 hora</div>
+    <div class="tool-chip">🔢 calcular</div>
+    <div class="tool-chip">📖 wikipedia</div>
+    <div class="tool-chip">📝 explicar código</div>
+    <div class="tool-chip">✅ corregir ejercicio</div>
+    <div class="tool-chip">💡 generar ejercicio</div>
+    <div class="tool-chip">📋 resumir texto</div>
+    <div class="tool-chip">💾 notas</div>
+  </div>
+
+  <div id="chat">
+        <div class="bienvenida" id="bienvenida">
+      <div class="icono">📚</div>
+      <h2>StudIA — Tutor de Informática</h2>
+      <p>Puedo corregir código, generar ejercicios, explicar conceptos y organizar tus apuntes. Prueba alguno:</p>
+      <div class="sugerencias" id="sugerencias">
+        <button class="sugerencia" onclick="suget('Corrige este código en Python: def suma(a,b): return a + b')">🔍 Corregir código</button>
+        <button class="sugerencia" onclick="suget('Explica este código: for i in range(10): print(i)')">📖 Explicar código</button>
+        <button class="sugerencia" onclick="suget('Genera un ejercicio sobre recursividad nivel intermedio')">💡 Generar ejercicio</button>
+        <button class="sugerencia" onclick="suget('Guarda una nota sobre POO con: La programación orientada a objetos...')">💾 Guardar nota</button>
+        <button class="sugerencia" onclick="suget('¿Qué hora es?')">🕐 Hora actual</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea
+        id="input"
+        placeholder="Escribe tu mensaje..."
+        rows="1"
+        autofocus
+      ></textarea>
+      <button id="btn" onclick="enviar()">Enviar</button>
+    </div>
+    <p class="hint">Enter para enviar · Shift+Enter para nueva línea</p>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const chatEl   = document.getElementById("chat");
+    const inputEl  = document.getElementById("input");
+    const btnEl    = document.getElementById("btn");
+    const bienvenida = document.getElementById("bienvenida");
+
+    // Auto-resize textarea
+    inputEl.addEventListener("input", () => {
+      inputEl.style.height = "auto";
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + "px";
+    });
+
+    // Enter para enviar, Shift+Enter para salto de línea
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        enviar();
+      }
+    });
+
+        function suget(texto) {
+      inputEl.value = texto;
+      enviar();
+    }
+
+    async function limpiar() {
+      if (!confirm("¿Estás seguro? Se borrará toda la conversación.")) return;
+      try {
+        await fetch("/limpiar", { method: "POST" });
+        // Limpiar el chat visualmente
+        chatEl.innerHTML = "";
+        if (bienvenida) {
+          chatEl.appendChild(bienvenida);
+        } else {
+          // Recrear bienvenida
+          const div = document.createElement("div");
+          div.className = "bienvenida";
+          div.id = "bienvenida";
+          div.innerHTML = `
+            <div class="icono">📚</div>
+            <h2>StudIA — Tutor de Informática</h2>
+            <p>Conversación limpiada. ¡Empieza de nuevo!</p>
+          `;
+          chatEl.appendChild(div);
+        }
+        document.getElementById("input").value = "";
+      } catch (err) {
+        console.error("Error al limpiar:", err);
+      }
+        }
+
+    async function verNotas() {
+      try {
+        const res = await fetch("/notas");
+        const datos = await res.json();
+        const notas = datos.notas || {};
+        const claves = Object.keys(notas);
+        if (claves.length === 0) {
+          alert("📭 No tienes notas guardadas todavía.");
+          return;
+        }
+        let html = "";
+        for (const key of claves) {
+          const n = notas[key];
+          html += `<div style="margin-bottom:12px">\n`;
+          html += `<strong>${n.tema}</strong> <small style="color:var(--muted)">(${n.fecha})</small>\n`;
+          html += `<div style="font-size:13px;margin-top:4px">${n.contenido}</div>\n`;
+          html += `</div>`;
+        }
+        // Mostrar en el chat como mensaje de IA con markdown renderizado
+        const burbuja = agregarMensaje("ia", "📋 **Tus notas guardadas:**");
+        const container = burbuja.parentElement;
+        const notasDiv = document.createElement("div");
+        notasDiv.className = "notas-container";
+        notasDiv.innerHTML = html;
+        container.appendChild(notasDiv);
+        chatEl.scrollTop = chatEl.scrollHeight;
+      } catch (err) {
+        alert("Error al cargar notas: " + err.message);
+      }
+    }
+
+    function agregarMensaje(rol, texto, herramienta = null) {
+      if (bienvenida) bienvenida.remove();
+
+      const div = document.createElement("div");
+      div.className = `msg ${rol}`;
+
+      if (herramienta) {
+        const tag = document.createElement("div");
+        tag.className = "tool-tag";
+        tag.textContent = `herramienta: ${herramienta}`;
+        div.appendChild(tag);
+      }
+
+      const burbuja = document.createElement("div");
+      burbuja.className = "burbuja";
+      burbuja.innerHTML = marked.parse(texto);  // markdown → HTML
+      div.appendChild(burbuja);
+
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+      return burbuja;
+    }
+
+    function mostrarPensando() {
+      const div = document.createElement("div");
+      div.className = "msg ia pensando";
+      div.id = "pensando";
+      div.innerHTML = `
+        <div class="burbuja">
+          <div class="dots">
+            <span></span><span></span><span></span>
+          </div>
+          Pensando...
+        </div>`;
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    function quitarPensando() {
+      document.getElementById("pensando")?.remove();
+    }
+
+    async function enviar() {
+      const texto = inputEl.value.trim();
+      if (!texto) return;
+
+      // Mostrar mensaje del usuario
+      agregarMensaje("usuario", texto);
+      inputEl.value = "";
+      inputEl.style.height = "auto";
+      btnEl.disabled = true;
+      mostrarPensando();
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mensaje: texto })
+        });
+
+        const datos = await res.json();
+        quitarPensando();
+
+        if (datos.error) {
+          agregarMensaje("ia", "Error: " + datos.error).classList.add("error");
+        } else {
+          agregarMensaje("ia", datos.respuesta, datos.herramienta);
+        }
+
+      } catch (err) {
+        quitarPensando();
+        agregarMensaje("ia", "No se pudo conectar con el servidor.").classList.add("error");
+      }
+
+      btnEl.disabled = false;
+      inputEl.focus();
+    }
+  </script>
+
+</body>
+</html>
