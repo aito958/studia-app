@@ -1,17 +1,18 @@
 import os
-
-
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, jsonify
 from agente import chat, cargar_notas, limpiar_historial
 
 app = Flask(__name__)
 
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+ALLOWED = {"pdf", "txt"}
 
 @app.route("/")
 def index():
     return render_template("index.html")
-
 
 @app.route("/chat", methods=["POST"])
 def chat_endpoint():
@@ -22,24 +23,18 @@ def chat_endpoint():
     resultado = chat(mensaje)
     return jsonify(resultado)
 
-
 @app.route("/notas", methods=["GET"])
 def notas_endpoint():
-    """Devuelve todas las notas guardadas."""
     notas = cargar_notas()
     return jsonify({"notas": notas})
 
-
 @app.route("/limpiar", methods=["POST"])
 def limpiar_endpoint():
-    """Borra el historial de conversación y las notas (opcional)."""
     limpiar_historial()
     return jsonify({"ok": True, "mensaje": "Historial limpiado"})
 
-
 @app.route("/estado", methods=["GET"])
 def estado_endpoint():
-    """Devuelve información sobre el estado actual."""
     notas = cargar_notas()
     from agente import historial
     return jsonify({
@@ -47,18 +42,6 @@ def estado_endpoint():
         "notas": len(notas),
         "modelo": "openai/gpt-oss-20b"
     })
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
-
-
-
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-ALLOWED = {"pdf", "txt"}
 
 @app.route("/subir", methods=["POST"])
 def subir_archivo():
@@ -73,7 +56,11 @@ def subir_archivo():
     nombre = secure_filename(archivo.filename)
     ruta = os.path.join(app.config["UPLOAD_FOLDER"], nombre)
     archivo.save(ruta)
-    from agente import leer_archivo, chat
+    from agente import leer_archivo
     contenido = leer_archivo(ruta)
     resultado = chat(f"El usuario ha subido un archivo llamado '{nombre}'. Este es su contenido:\n\n{contenido}\n\nConfirma que lo has recibido y pregúntale qué quiere hacer con él.")
     return jsonify({"ok": True, "respuesta": resultado.get("respuesta", ""), "nombre": nombre})
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
