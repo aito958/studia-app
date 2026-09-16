@@ -272,6 +272,7 @@
 
         .sugerencia:hover { background: rgba(124, 106, 255, 0.22); }
 
+
     /* NOTAS */
     .nota-tag {
       font-size: 10px;
@@ -363,6 +364,15 @@
       </div>
     </div>
   </div>
+
+<label for="archivo" title="Subir PDF o TXT"
+  style="display:flex; align-items:center; justify-content:center;
+         width:44px; height:44px; background:var(--surface);
+         border:1px solid var(--border); border-radius:10px;
+         cursor:pointer; font-size:18px; flex-shrink:0;">
+  📎
+  <input type="file" id="archivo" accept=".pdf,.txt" style="display:none" onchange="subirArchivo(this)">
+</label>
 
   <div class="input-area">
     <div class="input-wrap">
@@ -537,6 +547,36 @@
       btnEl.disabled = false;
       inputEl.focus();
     }
+
+async function subirArchivo(input) {
+  const archivo = input.files[0];
+  if (!archivo) return;
+
+  agregarMensaje("usuario", `📎 Archivo subido: ${archivo.name}`);
+  btnEl.disabled = true;
+  mostrarPensando();
+
+  const formData = new FormData();
+  formData.append("archivo", archivo);
+
+  try {
+    const res = await fetch("/subir", { method: "POST", body: formData });
+    const datos = await res.json();
+    quitarPensando();
+    if (datos.error) {
+      agregarMensaje("ia", "Error: " + datos.error).classList.add("error");
+    } else {
+      agregarMensaje("ia", datos.respuesta, "leer_archivo");
+    }
+  } catch (err) {
+    quitarPensando();
+    agregarMensaje("ia", "No se pudo subir el archivo.").classList.add("error");
+  }
+
+  btnEl.disabled = false;
+  input.value = "";
+}
+
   </script>
 
 </body>

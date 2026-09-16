@@ -575,3 +575,24 @@ if __name__ == "__main__":
             if resultado["herramienta"]:
                 print(f"[Herramienta: {resultado['herramienta']}]")
             print(f"IA: {resultado['respuesta']}\n")
+
+def leer_archivo(ruta: str):
+    """Lee el contenido de un archivo PDF o TXT."""
+    try:
+        ruta = Path(ruta)
+        if not ruta.exists():
+            return "El archivo no existe."
+        if ruta.suffix.lower() == ".txt":
+            return ruta.read_text(encoding="utf-8")
+        elif ruta.suffix.lower() == ".pdf":
+            import PyPDF2
+            texto = ""
+            with open(ruta, "rb") as f:
+                lector = PyPDF2.PdfReader(f)
+                for pagina in lector.pages:
+                    texto += pagina.extract_text() or ""
+            return texto[:3000] + "..." if len(texto) > 3000 else texto
+        else:
+            return "Formato no soportado. Usa PDF o TXT."
+    except Exception as e:
+        return f"Error al leer el archivo: {e}"
