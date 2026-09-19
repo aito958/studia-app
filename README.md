@@ -13,8 +13,10 @@ Herramienta	Descripción
 -Calculadora	        Resuelve expresiones matemáticas
 - Wikipedia	        Busca información en tiempo real
 - Hora actual	        Consulta la hora y fecha del sistema
-- Tecnologías
-- 
+
+
+  Tecnologías
+  
 Python + Flask — servidor web
 Groq API — modelo de lenguaje (openai/gpt-oss-20b)
 HTML/CSS/JS — interfaz web con diseño oscuro
@@ -45,21 +47,33 @@ http://localhost:5000
 📁 Estructura del proyecto
 studia-app/
 ├── app.py              # Servidor Flask y rutas de la API
+
 ├── agente.py           # Lógica del agente de IA y herramientas
+
 ├── requirements.txt    # Dependencias Python
+
 ├── Procfile            # Configuración para Railway
+
 ├── runtime.txt         # Versión de Python
+
 ├── templates/
 │   └── index.html      # Interfaz web
+
 └── uploads/            # Archivos subidos por el usuario
 
 🌐 Rutas de la API
 Método	Ruta	Descripción
+
 GET	/	Interfaz web
+
 POST	/chat	Enviar mensaje al agente
+
 POST	/subir	Subir archivo PDF o TXT
+
 GET	/notas	Ver todas las notas guardadas
+
 POST	/limpiar	Borrar historial de conversación
+
 GET	/estado	Estado del agente (mensajes, notas, modelo)
 
 
