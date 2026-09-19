@@ -4,7 +4,7 @@ Agente de inteligencia artificial especializado en ayudar a estudiantes de infor
 
 ✨ ¿Qué puede hacer?
 Herramienta	Descripción
-- Corregir ejercicios	Pega tu código y te dice qué falla, por qué y cómo mejorarlo
+- Corregir ejercicios	Pega tu código y te dice qué falla, por qué y cómo mejorarlo 
 - Explicar código	Explica línea a línea qué hace cualquier fragmento
 - Generar ejercicios	Crea ejercicios con enunciado, ejemplos y solución
 - Resumir apuntes	Pega texto largo y obtén los puntos clave
