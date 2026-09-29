@@ -44,8 +44,11 @@ bash
 python app.py
 5. Abre el navegador
 http://localhost:5000
+
 📁 Estructura del proyecto
+
 studia-app/
+
 ├── app.py              # Servidor Flask y rutas de la API
 
 ├── agente.py           # Lógica del agente de IA y herramientas
