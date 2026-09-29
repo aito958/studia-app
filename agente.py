@@ -8,9 +8,7 @@ from groq import Groq
 from dotenv import load_dotenv
 import wikipediaapi
 
-# ----------------------------------------------------------
-# CONFIGURACIÓN INICIAL
-# ----------------------------------------------------------
+
 load_dotenv(Path(__file__).parent / ".env")
 
 api_key = os.getenv("GROQ_API_KEY")
@@ -25,40 +23,47 @@ MAX_MENSAJES = 20
 MEMORIA_PATH = Path(__file__).parent / "memoria.json"
 NOTAS_PATH = Path(__file__).parent / "notas.json"
 
-# ----------------------------------------------------------
-# SYSTEM PROMPT — Tutor de informática especializado
-# ----------------------------------------------------------
 SYSTEM_PROMPT = {
     "role": "system",
     "content": (
-        "Eres **StudIA**, un asistente de IA especializado en ayudar a estudiantes de "
-        "informática. Tu especialidad es:\n"
-        "1. **Corregir ejercicios** - Revisa código, encuentra errores, sugiere mejoras.\n"
-        "2. **Asistente de apuntes** - Genera y organiza apuntes sobre programación, "
-        "algoritmos, bases de datos, redes, sistemas operativos, etc.\n"
-        "3. **Explicar conceptos** y **generar ejercicios de práctica**.\n\n"
-        "REGLAS DE USO DE HERRAMIENTAS (¡muy importante!):\n"
-        "- Si el usuario pide GUARDAR o CREAR una NOTA → usa guardar_nota(tema, contenido).\n"
-        "- Si el usuario pide BUSCAR, VER o RECORDAR una NOTA → usa buscar_nota(tema).\n"
-        "- Si el usuario pide EXPLICAR CÓDIGO → usa explicar_codigo(codigo, lenguaje).\n"
-        "- Si el usuario pide CORREGIR un EJERCICIO → usa corregir_ejercicio(enunciado, codigo, lenguaje).\n"
-        "- Si el usuario pide GENERAR un EJERCICIO → usa generar_ejercicio(tema, dificultad).\n"
-        "- Si el usuario pide RESUMIR TEXTO → usa resumir_texto(texto).\n"
-        "- Si el usuario pide la HORA → usa get_hora_actual().\n"
-        "- Si el usuario pide HACER CUENTAS → usa calcular(expresion).\n"
-        "- Si el usuario pide BUSCAR información → usa buscar_wikipedia(termino).\n\n"
-        "REGLA CLAVE: Cuando una herramienta (nota, cálculo, wikipedia, etc.)\n"
-        "devuelve un resultado, DEBES incluir esa información textualmente en tu "
-        "respuesta. Por ejemplo, si buscar_nota devuelve el contenido de una nota, "
-        "muéstralo al usuario. Si calcular devuelve un resultado, inclú-yelo. "
-        "Si Wikipedia devuelve un texto, cita los puntos clave.\n\n"
-        "Siempre responde en español, tono amable y didáctico. Usa markdown."
+        "# Rol\n"
+        "Eres **StudIA**, un tutor de informática para estudiantes universitarios y de FP. "
+        "Tu objetivo es que el alumno APRENDA y entienda, no solo que obtenga la respuesta.\n\n"
+
+        "# Áreas\n"
+        "Programación, algoritmos y estructuras de datos, bases de datos, redes, "
+        "sistemas operativos e ingeniería del software.\n\n"
+
+        "# Cómo enseñas\n"
+        "- Adapta el nivel: si el alumno parece principiante, usa analogías y pasos "
+        "pequeños; si es avanzado, ve al grano.\n"
+        "- Al corregir código: primero indica qué está bien, luego los errores "
+        "(explicando la causa), y por último la versión mejorada.\n"
+        "- Si el alumno parece estar haciendo una tarea evaluable, prioriza pistas y "
+        "preguntas guía antes de dar la solución completa. Dásela si insiste "
+        "o ya lo intentó.\n"
+        "- Cierra las explicaciones largas con una pregunta corta o mini-ejercicio "
+        "para comprobar la comprensión.\n\n"
+
+        "# Herramientas\n"
+        "Usa las herramientas disponibles cuando la petición encaje con su descripción. "
+        "Cuando una herramienta devuelva un resultado, preséntalo al usuario de forma "
+        "fiel, sin añadir datos que la herramienta no haya devuelto. "
+        "Si falta información para usar una herramienta (por ejemplo, tema o contenido "
+        "de una nota), pídela antes de llamarla.\n\n"
+
+        "# Honestidad y límites\n"
+        "- Si no estás seguro de algo, dilo; nunca inventes funciones, librerías ni datos.\n"
+        "- Si la pregunta no tiene relación con informática o estudio, responde "
+        "brevemente y reconduce con amabilidad.\n\n"
+
+        "# Formato\n"
+        "Responde siempre en español, con tono amable y didáctico. Usa markdown: "
+        "código en bloques con el lenguaje indicado y listas para pasos. "
+        "Sé conciso: no repitas lo que ya se ha dicho."
     )
 }
 
-# ----------------------------------------------------------
-# MEMORIA: cargar y guardar historial de conversación
-# ----------------------------------------------------------
 def cargar_historial():
     """Carga el historial guardado en memoria.json."""
     if MEMORIA_PATH.exists():
@@ -84,9 +89,7 @@ def limpiar_historial():
     if MEMORIA_PATH.exists():
         MEMORIA_PATH.write_text("[]", encoding="utf-8")
 
-# ----------------------------------------------------------
-# NOTAS: sistema de guardado y búsqueda de apuntes
-# ----------------------------------------------------------
+
 def cargar_notas():
     """Carga las notas guardadas en notas.json."""
     if NOTAS_PATH.exists():
@@ -124,9 +127,7 @@ def buscar_nota(tema):
             )
     return f"No encontré ninguna nota sobre '{tema}'. Usa guardar_nota para crear una."
 
-# ----------------------------------------------------------
-# HERRAMIENTAS BÁSICAS
-# ----------------------------------------------------------
+
 def get_hora_actual():
     ahora = datetime.now()
     return f"Son las {ahora.strftime('%H:%M')} del {ahora.strftime('%d/%m/%Y')}"
@@ -150,9 +151,6 @@ def buscar_wikipedia(termino: str):
     except Exception as e:
         return f"Error al buscar en Wikipedia: {e}"
 
-# ----------------------------------------------------------
-# HERRAMIENTAS CON IA (usan la API de Groq internamente)
-# ----------------------------------------------------------
 def _llamada_simple(prompt_sistema: str, mensaje_usuario: str) -> str:
     """Helper: llama a la API con un system prompt específico y un solo mensaje."""
     try:
@@ -203,10 +201,6 @@ def resumir_texto(texto: str):
     )
     return _llamada_simple(prompt, texto)
 
-
-# ----------------------------------------------------------
-# DESCRIPCIÓN DE LAS HERRAMIENTAS PARA LA IA
-# ----------------------------------------------------------
 herramientas = [
     {
         "type": "function",
@@ -377,9 +371,7 @@ herramientas = [
     }
 ]
 
-# ----------------------------------------------------------
-# FUNCIÓN QUE EJECUTA LA HERRAMIENTA QUE PIDA LA IA
-# ----------------------------------------------------------
+
 def ejecutar_herramienta(nombre, argumentos):
     if nombre == "get_hora_actual":
         return get_hora_actual()
@@ -416,15 +408,10 @@ def ejecutar_herramienta(nombre, argumentos):
         return f"Herramienta '{nombre}' no reconocida."
 
 
-# ----------------------------------------------------------
-# HISTORIAL: cargamos al arrancar
-# ----------------------------------------------------------
 historial = [SYSTEM_PROMPT] + cargar_historial()
 
 
-# ----------------------------------------------------------
-# ROUTING POR PALABRAS CLAVE (respaldo para notas)
-# ----------------------------------------------------------
+
 def _intent_routing(mensaje_usuario: str):
     """
     Si el mensaje claramente pide guardar o buscar una nota,
@@ -435,22 +422,17 @@ def _intent_routing(mensaje_usuario: str):
     import re as _re
     msg_lower = mensaje_usuario.lower()
 
-    # --- Guardar nota ---
     if "guarda" in msg_lower and "nota" in msg_lower:
-        # Extraer tema: después de "sobre"
         tema_match = _re.search(r'sobre\s+(.+?)(?:\s+(?:con|con contenido|el contenido)|\.|$)', mensaje_usuario, _re.IGNORECASE)
         tema = tema_match.group(1).strip().rstrip('.') if tema_match else "Sin tema"
 
-        # Extraer contenido: después de "con:" o "con contenido:"
         contenido_match = _re.search(r'(?:con[:：]\s*|\bcontenido[:：]\s*)([\s\S]+)', mensaje_usuario, _re.IGNORECASE)
         contenido = contenido_match.group(1).strip() if contenido_match else ""
 
         if contenido and tema:
             return "guardar_nota", guardar_nota(tema, contenido)
 
-    # --- Buscar nota ---
     if "busca" in msg_lower and "nota" in msg_lower:
-        # Extraer tema: después de "nota sobre" o después de "sobre"
         tema_match = _re.search(r'sobre\s+(.+?)(?:\s|$|,|\.)', mensaje_usuario, _re.IGNORECASE)
         tema = tema_match.group(1).strip().rstrip('.') if tema_match else ""
 
@@ -459,10 +441,6 @@ def _intent_routing(mensaje_usuario: str):
 
     return None, None
 
-
-# ----------------------------------------------------------
-# FUNCIÓN PRINCIPAL (usada por app.py)
-# ----------------------------------------------------------
 def chat(mensaje_usuario: str):
     """Procesa un mensaje del usuario y devuelve la respuesta de la IA."""
     historial.append({"role": "user", "content": mensaje_usuario})
@@ -483,7 +461,6 @@ def chat(mensaje_usuario: str):
     mensaje = respuesta.choices[0].message
 
     if mensaje.tool_calls:
-        # Convertir a dict con solo los campos soportados + tool_calls serializables
         msg_dict = {
             "role": mensaje.role,
             "content": mensaje.content,
@@ -524,7 +501,6 @@ def chat(mensaje_usuario: str):
             return {"error": str(e), "herramienta": herramienta_usada}
 
     else:
-        # Fallback: routing por palabras clave si el modelo no usó herramientas
         tool_name, tool_result = _intent_routing(mensaje_usuario)
         if tool_name:
             herramienta_usada = tool_name
@@ -546,19 +522,15 @@ def chat(mensaje_usuario: str):
 
     mensaje_ia = mensaje_ia.strip()
 
-    # Limitar tamaño del historial
     if len(historial) > MAX_MENSAJES:
         historial[:] = [historial[0]] + historial[-(MAX_MENSAJES - 1):]
 
-    # Guardar en memoria persistente
     guardar_historial(historial)
 
     return {"respuesta": mensaje_ia, "herramienta": herramienta_usada}
 
 
-# ----------------------------------------------------------
-# MODO CLI (opcional): python agente.py
-# ----------------------------------------------------------
+
 if __name__ == "__main__":
     print("StudIA — Tu asistente de estudio de informática")
     print("Escribe 'salir' para terminar.\n")
